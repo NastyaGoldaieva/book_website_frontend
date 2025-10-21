@@ -16,33 +16,55 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuth = async () => {
-    try {
-      const response = await authAPI.getProfile();
-      setUser(response.data);
-    } catch (error) {
+    const token = localStorage.getItem('access_token');
+    const userData = localStorage.getItem('user');
+
+    if (token && userData) {
+      try {
+        const profileResponse = await authAPI.getProfile();
+        setUser(profileResponse.data);
+      } catch (error) {
+        console.error('Token validation failed:', error);
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        setUser(null);
+      }
+    } else {
       setUser(null);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
-  const login = async (username, password) => {
-    try {
-      await authAPI.login({ username, password });
-      const profileResponse = await authAPI.getProfile();
-      setUser(profileResponse.data);
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || 'Помилка входу'
-      };
-    }
-  };
+    const login = async (credentials) => {
+      try {
+        const response = await authAPI.login(credentials);
+        const { access, refresh, user: userData } = response.data;
 
-  const register = async (username, email, password) => {
+        localStorage.setItem('access_token', access);
+        localStorage.setItem('refresh_token', refresh);
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        setUser(userData);
+        return { success: true };
+      } catch (error) {
+        return {
+          success: false,
+          error: error.response?.data?.error || 'Помилка входу'
+        };
+      }
+    };
+
+  const register = async (userData) => {
     try {
-      await authAPI.register({ username, email, password });
+      const response = await authAPI.register(userData);
+      const { access, refresh, user: newUser } = response.data;
+
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      localStorage.setItem('user', JSON.stringify(newUser));
+
+      setUser(newUser);
       return { success: true };
     } catch (error) {
       return {
@@ -52,14 +74,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setUser(null);
-    }
+  const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const value = {
@@ -67,7 +91,9 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    loading
+    loading,
+    updateUser,
+    isAuthenticated: !!user
   };
 
   return (

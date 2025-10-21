@@ -1,53 +1,79 @@
 import React from 'react';
-import { Container, Typography, Box, Button } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  Paper
+} from '@mui/material';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
+  const { isAuthenticated, user } = useAuth();
+
   return (
     <Container maxWidth="lg">
-      <Box
-        sx={{
-          textAlign: 'center',
-          py: 8,
-          background: 'linear-gradient(45deg, #4A6572 30%, #344955 90%)',
-          color: 'white',
-          borderRadius: 2,
-          mb: 4
-        }}
-      >
+      <Box sx={{ mt: 4, mb: 4, textAlign: 'center' }}>
         <Typography variant="h2" component="h1" gutterBottom>
-          Ласкаво просимо до Bookstore
+          Ласкаво просимо до Книжкового магазину
         </Typography>
-        <Typography variant="h5" component="p" gutterBottom>
-          Відкрийте для себе світ книг з нашою унікальною колекцією
-        </Typography>
-        <Button
-          component={Link}
-          to="/books"
-          variant="contained"
-          size="large"
-          sx={{ mt: 2, bgcolor: 'white', color: 'primary.main' }}
-        >
-          Переглянути книги
-        </Button>
-      </Box>
 
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Чому обирають нас?
-        </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'space-around', mt: 4 }}>
-          <Box sx={{ maxWidth: 300 }}>
-            <Typography variant="h6" gutterBottom>📚 Широкий вибір</Typography>
-            <Typography>Понад 1000 книг різних жанрів</Typography>
-          </Box>
-          <Box sx={{ maxWidth: 300 }}>
-            <Typography variant="h6" gutterBottom>🚀 Швидка доставка</Typography>
-            <Typography>Доставка по всій Україні за 1-3 дні</Typography>
-          </Box>
-          <Box sx={{ maxWidth: 300 }}>
-            <Typography variant="h6" gutterBottom>⭐ Якісний сервіс</Typography>
-            <Typography>Професійне обслуговування клієнтів</Typography>
+        <Paper elevation={2} sx={{ p: 4, mt: 3 }}>
+          {isAuthenticated ? (
+            <>
+              <Typography variant="h5" gutterBottom>
+                Вітаємо, {user?.username}!
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Ви увійшли в систему і можете отримати доступ до всіх функцій нашого книжкового магазину.
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Button variant="contained" component={Link} to="/books" sx={{ mr: 2 }}>
+                  Переглянути книги
+                </Button>
+                <Button variant="outlined" component={Link} to="/profile">
+                  Переглянути профіль
+                </Button>
+              </Box>
+            </>
+          ) : (
+            <>
+              <Typography variant="h5" gutterBottom>
+                Відкрийте для себе чудові книги
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Будь ласка, увійдіть або зареєструйтеся, щоб отримати доступ до всіх функцій.
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Button variant="contained" component={Link} to="/login" sx={{ mr: 2 }}>
+                  Увійти
+                </Button>
+                <Button variant="outlined" component={Link} to="/register">
+                  Зареєструватися
+                </Button>
+              </Box>
+            </>
+          )}
+        </Paper>
+
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            Публічний контент
+          </Typography>
+          <Typography variant="body1">
+            Кожен може переглядати нашу колекцію книг, авторів та видавництв.
+          </Typography>
+          <Box sx={{ mt: 2 }}>
+            <Button component={Link} to="/books" sx={{ mr: 1 }}>
+              Книги
+            </Button>
+            <Button component={Link} to="/authors" sx={{ mr: 1 }}>
+              Автори
+            </Button>
+            <Button component={Link} to="/publishers">
+              Видавництва
+            </Button>
           </Box>
         </Box>
       </Box>

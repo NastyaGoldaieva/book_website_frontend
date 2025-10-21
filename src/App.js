@@ -1,8 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -11,7 +11,8 @@ import Books from './pages/Books';
 import Authors from './pages/Authors';
 import Publishers from './pages/Publishers';
 import Profile from './pages/Profile';
-import Login from './components/Login';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import About from './pages/About';
 import AuthorDetail from './pages/AuthorDetail';
 import BookDetail from './pages/BookDetail';
@@ -28,6 +29,26 @@ const theme = createTheme({
   },
 });
 
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div>Завантаження...</div>;
+  }
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div>Завантаження...</div>;
+  }
+
+  return !isAuthenticated ? children : <Navigate to="/" replace />;
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -40,14 +61,59 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/books" element={<Books />} />
-                <Route path="/books/:id" element={<BookDetail />} />
+                <Route
+                  path="/books/:id"
+                  element={
+                    <ProtectedRoute>
+                      <BookDetail />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/authors" element={<Authors />} />
-                <Route path="/authors/:id" element={<AuthorDetail />} />
+                <Route
+                  path="/authors/:id"
+                  element={
+                    <ProtectedRoute>
+                      <AuthorDetail />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/publishers" element={<Publishers />} />
-                <Route path="/publishers/:id" element={<PublisherDetail />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/publishers/:id"
+                  element={
+                    <ProtectedRoute>
+                      <PublisherDetail />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/about" element={<About />} />
+
+                <Route
+                  path="/login"
+                  element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <PublicRoute>
+                      <Register />
+                    </PublicRoute>
+                  }
+                />
+
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </main>
             <Footer />

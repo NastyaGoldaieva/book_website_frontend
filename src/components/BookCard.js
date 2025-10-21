@@ -11,7 +11,7 @@ import {
   CardActions
 } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Favorite, Share } from '@mui/icons-material';
+import { ShoppingCart, Favorite } from '@mui/icons-material';
 
 const BookCard = ({ book }) => {
   const handleAddToCart = (e) => {
